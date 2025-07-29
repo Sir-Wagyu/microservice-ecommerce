@@ -30,6 +30,13 @@ const CustomerController = {
             return res.status(404).json({ message: "Customer not found" });
          }
 
+         const userResponse = await axios.get(`${process.env.USER_SERVICE_URL}/api/users/${customer.user_id}`);
+         if (userResponse.status !== 200 || !userResponse.data) {
+            return res.status(404).json({ message: "User not found in User Service" });
+         }
+         customer.user_info = userResponse.data.user;
+         delete customer.user_id;
+
          res.status(200).json({ customer });
       } catch (error) {
          console.error("Error fetching customer by ID:", error);

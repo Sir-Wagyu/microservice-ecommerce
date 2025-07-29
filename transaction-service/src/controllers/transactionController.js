@@ -15,8 +15,8 @@ const TransactionController = {
          }
          let totalAmount = 0;
          const processedItems = [];
-         // 2. Validasi Produk dan Kurangi Stok dengan Product
-         Service;
+
+         // 2. Validasi Produk dan Kurangi Stok dengan Product Service
          for (const item of items) {
             const productResponse = await axios.get(`${process.env.PRODUCT_SERVICE_URL}/api/products/${item.productId}`);
             if (productResponse.status !== 200 || !productResponse.data) {
@@ -35,6 +35,7 @@ const TransactionController = {
                stock: product.stock - item.quantity,
             });
          }
+
          // 3. Buat Transaksi
          const transactionId = await TransactionModel.createTransaction(customerId, totalAmount, "pending");
          // 4. Tambahkan Item Transaksi

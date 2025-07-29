@@ -3,13 +3,18 @@ const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.json());
+
+// app.use(express.json());
 // Proxy routes to respective microservices
 app.use(
    "/api/users",
    createProxyMiddleware({
       target: process.env.USER_SERVICE_URL,
       changeOrigin: true,
+      // pathRewrite: {
+      //    "^/(.*)": "/api/users/",
+      //    "^/": "/api/users",
+      // },
    })
 );
 app.use(
@@ -39,6 +44,6 @@ app.get("/", (req, res) => {
 });
 app.listen(PORT, () => {
    console.log(`API Gateway running on port ${PORT}`);
-   console.log(`Frontend can access all services via
+   console.log(`Frontend can access all services via 
 http://localhost:${PORT}/api/...`);
 });

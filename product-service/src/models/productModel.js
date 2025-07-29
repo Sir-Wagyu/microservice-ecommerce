@@ -11,13 +11,39 @@ const ProductModel = {
       return rows[0];
    },
 
-   update: async (id, name, description, price, stock, imageUrl) => {
-      const [result] = await pool.execute("UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image_url = ? WHERE id = ?", [name, description, price, stock, imageUrl, id]);
-      return result.affectedRows;
-   },
+   update: async (id, data) => {
+      const fields = [];
+      const values = [];
 
-   update: async (id, newStock) => {
-      const [result] = await pool.execute("UPDATE products SET stock = ? WHERE id = ?", [newStock, id]);
+      if (data.name !== undefined) {
+         fields.push("name = ?");
+         values.push(data.name);
+      }
+      if (data.description !== undefined) {
+         fields.push("description = ?");
+         values.push(data.description);
+      }
+      if (data.price !== undefined) {
+         fields.push("price = ?");
+         values.push(data.price);
+      }
+      if (data.stock !== undefined) {
+         fields.push("stock = ?");
+         values.push(data.stock);
+      }
+      if (data.image_url !== undefined) {
+         fields.push("image_url = ?");
+         values.push(data.image_url);
+      }
+
+      if (fields.length === 0) {
+         return 0; // No fields to update
+      }
+
+      values.push(id); // Add id for WHERE clause
+      const query = `UPDATE products SET ${fields.join(", ")} WHERE id = ?`;
+
+      const [result] = await pool.execute(query, values);
       return result.affectedRows;
    },
 

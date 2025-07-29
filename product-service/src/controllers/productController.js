@@ -33,14 +33,36 @@ const ProductController = {
    },
 
    updateProduct: async (req, res) => {
-      const { id } = req.params;
-      const { name, description, price, stock, imageUrl } = req.body;
       try {
-         const affectedRows = await ProductModel.update(id, name, description, price, stock, imageUrl);
-         if (affectedRows === 0) {
-            return res.status(404).json({ message: "Product not found or no changes made" });
+         const { id } = req.params;
+         const existingProduct = await ProductModel.findById(id);
+
+         if (!existingProduct) {
+            return res.status(404).json({ message: "Product not found" });
          }
-         res.status(200).json({ message: "Product updated successfully" });
+
+         const dataToUpdate = {
+            name: req.body.name || existingProduct.name,
+            description: req.body.description || existingProduct.description,
+            price: req.body.price !== undefined ? req.body.price : existingProduct.price,
+            stock: req.body.stock !== undefined ? req.body.stock : existingProduct.stock,
+            image_url: req.body.image_url || req.body.imageUrl || existingProduct.image_url,
+         };
+
+         // Remove undefined values
+         Object.keys(dataToUpdate).forEach((key) => {
+            if (dataToUpdate[key] === undefined) {
+               delete dataToUpdate[key];
+            }
+         });
+
+         const affectedRows = await ProductModel.update(id, dataToUpdate);
+
+         if (affectedRows > 0) {
+            res.status(200).json({ message: "Product updated successfully" });
+         } else {
+            res.status(200).json({ message: "Product data is already up to date." });
+         }
       } catch (error) {
          console.error("Error updating product:", error);
          res.status(500).json({ message: "Error updating product" });

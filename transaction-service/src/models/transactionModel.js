@@ -12,11 +12,9 @@ const TransactionModel = {
 
    findById: async (id) => {
       const [rows] = await pool.execute(
-         `SELECT t.*, ci.id AS item_id, ci.product_id, ci.quantity, ci.price_per_item, 
-            p.name AS product_name, p.price AS product_price
+         `SELECT t.*, ci.id AS item_id, ci.product_id, ci.quantity, ci.price_per_item
             FROM transactions t
             JOIN transaction_items ci ON t.id = ci.transaction_id
-            JOIN products p ON ci.product_id = p.id
             WHERE t.id = ?`,
          [id]
       );
@@ -25,11 +23,9 @@ const TransactionModel = {
 
    findByCustomerId: async (customerId) => {
       const [rows] = await pool.execute(
-         `SELECT t.*, ci.id AS item_id, ci.product_id, ci.quantity, ci.price_per_item, 
-            p.name AS product_name, p.price AS product_price
+         `SELECT t.*, ci.id AS item_id, ci.product_id, ci.quantity, ci.price_per_item
             FROM transactions t
             JOIN transaction_items ci ON t.id = ci.transaction_id
-            JOIN products p ON ci.product_id = p.id
             WHERE t.customer_id = ?
             ORDER BY t.transaction_date DESC`,
          [customerId]
@@ -48,16 +44,12 @@ const TransactionModel = {
    },
 
    getAll: async () => {
-      const [rows] = await pool.execute(
-         `SELECT t.*,
-            ci.id AS item_id, ci.product_id, ci.quantity,
-            ci.price_per_item,
-            p.name AS product_name, p.price AS product_price
-            FROM transactions t
-            JOIN transaction_items ci ON t.id = ci.transaction_id
-            JOIN products p ON ci.product_id = p.id
-            ORDER BY t.transaction_date DESC`
-      );
+      const [rows] = await pool.execute(`SELECT * FROM transactions ORDER BY transaction_date DESC`);
+      return rows;
+   },
+
+   findItemsByTransactionId: async (transactionId) => {
+      const [rows] = await pool.execute(`SELECT * FROM transaction_items WHERE transaction_id = ?`, [transactionId]);
       return rows;
    },
 };
